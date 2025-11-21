@@ -1,0 +1,199 @@
+# Task Manager API - Test Requests
+# Use with VS Code REST Client extension
+# Install: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+# Variables
+@baseUrl = http://localhost:3000
+@token = YOUR_TOKEN_HERE
+@taskId = YOUR_TASK_ID_HERE
+
+###############################################
+# AUTHENTICATION
+###############################################
+
+### Root endpoint - Test server is running
+GET {{baseUrl}}
+
+### Signup - Create new user
+POST {{baseUrl}}/users/signup
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Login - Get authentication token
+# Copy the token from response and paste it in @token variable above
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Get user profile (requires auth)
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+### Update user profile
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "John Updated"
+}
+
+### Logout
+POST {{baseUrl}}/users/logout
+Authorization: Bearer {{token}}
+
+### Logout from all devices
+POST {{baseUrl}}/users/logoutAll
+Authorization: Bearer {{token}}
+
+### Delete user account
+DELETE {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+###############################################
+# TASKS
+###############################################
+
+### Create task
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Learn Express.js and MongoDB"
+}
+
+### Create completed task
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Setup Node.js project",
+  "completed": true
+}
+
+### Get all tasks
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+
+### Get completed tasks only
+GET {{baseUrl}}/tasks?completed=true
+Authorization: Bearer {{token}}
+
+### Get incomplete tasks only
+GET {{baseUrl}}/tasks?completed=false
+Authorization: Bearer {{token}}
+
+### Get tasks with pagination
+GET {{baseUrl}}/tasks?limit=2&skip=0
+Authorization: Bearer {{token}}
+
+### Get tasks sorted by creation date (newest first)
+GET {{baseUrl}}/tasks?sortBy=createdAt:desc
+Authorization: Bearer {{token}}
+
+### Get tasks sorted by creation date (oldest first)
+GET {{baseUrl}}/tasks?sortBy=createdAt:asc
+Authorization: Bearer {{token}}
+
+### Get specific task by ID
+# Replace {{taskId}} with actual task ID from create response
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+
+### Update task - Mark as complete
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+### Update task - Change description
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Updated task description"
+}
+
+### Delete task
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+
+###############################################
+# TESTING SCENARIOS
+###############################################
+
+### Scenario 1: Complete user signup to task creation flow
+# Step 1: Signup
+POST {{baseUrl}}/users/signup
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "email": "alice@test.com",
+  "password": "alice123"
+}
+
+# Step 2: Copy token from response above and update @token variable
+# Step 3: Create first task
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "My first task"
+}
+
+### Scenario 2: Test validation errors
+
+# Invalid email (should fail)
+POST {{baseUrl}}/users/signup
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "email": "invalidemail",
+  "password": "pass123"
+}
+
+# Password too short (should fail)
+POST {{baseUrl}}/users/signup
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "email": "test@example.com",
+  "password": "123"
+}
+
+# Missing required field (should fail)
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+### Scenario 3: Test unauthorized access
+
+# Try to get tasks without token (should fail with 401)
+GET {{baseUrl}}/tasks
+
+# Try with invalid token (should fail with 401)
+GET {{baseUrl}}/tasks
+Authorization: Bearer invalid_token_here
