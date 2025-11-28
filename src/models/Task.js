@@ -16,6 +16,15 @@ const taskSchema = new mongoose.Schema({
     type: Boolean,
     default: false       // Tasks are incomplete by default
   },
+  dueDate: {
+    type: Date,
+    required: false      // Optional - not all tasks need a due date
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],  // Only these values are allowed
+    default: 'medium'    // Default priority is medium
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,  // Reference to User's _id
     required: true,

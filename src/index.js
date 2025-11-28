@@ -7,6 +7,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 // Import database connection
@@ -25,6 +26,20 @@ const port = process.env.PORT || 3000;
 // ============================================
 // MIDDLEWARE
 // ============================================
+
+// CORS - Allow frontend to communicate with backend
+// This is needed because frontend (localhost:5173) and backend (localhost:3000)
+// are on different ports (different "origins")
+const corsOptions = {
+  origin: [
+    'http://localhost:5173', // Vite's default port (development)
+    'https://task-manager-frontend.vercel.app', // Production domain
+    'https://task-manager-frontend-jamestruongs-projects.vercel.app', // Alternative Vercel domain
+  ],
+  credentials: true, // Allow cookies and authorization headers
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 // Rate limiting - prevent spam/abuse
 // Limits each IP to 100 requests per 15 minutes
